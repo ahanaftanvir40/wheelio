@@ -50,9 +50,9 @@ export default function Onboarding() {
   const isLastSlide = currentIndex === slides.length - 1;
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-black">
+    <SafeAreaView className="flex-1 bg-white dark:bg-black" edges={['top', 'left', 'right']}>
       {/* Skip Button */}
-      <View className="absolute top-4 right-6 z-10">
+      <View className="pt-4 pr-6 items-end">
         <TouchableOpacity onPress={handleSkip}>
           <Text className="text-base font-semibold text-neutral-600 dark:text-neutral-400">
             Skip
