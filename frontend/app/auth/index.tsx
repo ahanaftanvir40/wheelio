@@ -11,14 +11,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import api from "../../lib/api";
+import { useAuth } from "../../context/authContext";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const { login, signup } = useAuth();
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -147,26 +145,13 @@ export default function Auth() {
     if (!validateLoginForm()) return;
 
     setLoading(true);
-    try {
-      const response = await api.post("/loginuser", {
-        email: loginEmail,
-        password: loginPassword,
-      });
+    const result = await login(loginEmail, loginPassword);
+    setLoading(false);
 
-      if (response.data.success) {
-        // Store token in AsyncStorage
-        await AsyncStorage.setItem("authToken", response.data.authToken);
-        Alert.alert("Success", "Login successful!");
-        router.replace("/home");
-      } else {
-        setError("Invalid email or password");
-      }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Login failed. Please try again."
-      );
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      Alert.alert("Success", "Login successful!");
+    } else {
+      setError(result.message || "Login failed. Please try again.");
     }
   };
 
@@ -176,69 +161,49 @@ export default function Auth() {
     if (!validateSignupForm()) return;
 
     setLoading(true);
-    try {
-      // Create FormData for multipart/form-data
-      const formData = new FormData();
-      formData.append("name", signupName);
-      formData.append("email", signupEmail);
-      formData.append("password", signupPassword);
-      formData.append("phoneNumber", phoneNumber);
-      formData.append("userType", userType);
 
-      // Add avatar if selected
-      if (avatar) {
-        const avatarFile: any = {
-          uri: avatar.uri,
+    // Create FormData for multipart/form-data
+    const formData = new FormData();
+    formData.append("name", signupName);
+    formData.append("email", signupEmail);
+    formData.append("password", signupPassword);
+    formData.append("phoneNumber", phoneNumber);
+    formData.append("userType", userType);
+
+    // Add avatar if selected
+    if (avatar) {
+      const avatarFile: any = {
+        uri: avatar.uri,
+        type: "image/jpeg",
+        name: `avatar_${Date.now()}.jpg`,
+      };
+      formData.append("avatar", avatarFile);
+    }
+
+    // Add driver-specific fields
+    if (userType === "Driver") {
+      formData.append("drivingLicense", drivingLicense);
+      formData.append("nationalId", nationalId);
+
+      if (licenseFile) {
+        const licenseFileData: any = {
+          uri: licenseFile.uri,
           type: "image/jpeg",
-          name: `avatar_${Date.now()}.jpg`,
+          name: `license_${Date.now()}.jpg`,
         };
-        formData.append("avatar", avatarFile);
+        formData.append("licenseFile", licenseFileData);
       }
+    }
 
-      // Add driver-specific fields
-      if (userType === "Driver") {
-        formData.append("drivingLicense", drivingLicense);
-        formData.append("nationalId", nationalId);
+    const result = await signup(formData);
+    setLoading(false);
 
-        if (licenseFile) {
-          const licenseFileData: any = {
-            uri: licenseFile.uri,
-            type: "image/jpeg",
-            name: `license_${Date.now()}.jpg`,
-          };
-          formData.append("licenseFile", licenseFileData);
-        }
-      }
-
-      const response = await api.post("/createuser", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.data.success) {
-        Alert.alert("Success", "Account created successfully! Please login.");
-        // Switch to login view
-        setIsLogin(true);
-        // Clear signup form
-        clearSignupForm();
-      } else {
-        if (response.data.error) {
-          // Handle validation errors from backend
-          const errors = response.data.error
-            .map((e: any) => e.message)
-            .join("\n");
-          setError(errors);
-        } else {
-          setError("Email already exists or registration failed");
-        }
-      }
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message || "Signup failed. Please try again."
-      );
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      Alert.alert("Success", "Account created successfully! Please login.");
+      setIsLogin(true);
+      clearSignupForm();
+    } else {
+      setError(result.errors || result.message || "Signup failed. Please try again.");
     }
   };
 
