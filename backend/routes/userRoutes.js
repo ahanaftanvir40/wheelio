@@ -135,6 +135,18 @@ router.get('/drivers', async (req, res) => {
     }
 });
 
+router.get('/my-vehicles', auth, async (req, res) => {
+    try {
+        const user = await User.findOne({ email: req.user.email }).populate('added_vehicle_id');
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.json({ success: true, vehicles: user.added_vehicle_id });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 
 export default router

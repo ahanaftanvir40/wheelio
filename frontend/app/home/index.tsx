@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../context/authContext";
@@ -8,7 +8,28 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function Home() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+          },
+        },
+      ]
+    );
+  };
 
   if (loading) {
     return (
@@ -37,8 +58,8 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* User Avatar */}
-          <TouchableOpacity className="flex-row items-center gap-3">
+          {/* User Info & Logout */}
+          <View className="flex-row items-center gap-3">
             <View>
               <Text className="text-sm font-semibold text-right text-neutral-900 dark:text-neutral-100">
                 {user?.name || "User"}
@@ -51,7 +72,7 @@ export default function Home() {
               {user?.avatar ? (
                 <Image
                   source={{ uri: user.avatar }}
-                  className="w-full h-full rounded-full"
+                  style={{ width: 48, height: 48, borderRadius: 24 }}
                 />
               ) : (
                 <Text className="text-white font-bold text-lg">
@@ -59,7 +80,13 @@ export default function Home() {
                 </Text>
               )}
             </View>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleLogout}
+              className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl items-center justify-center"
+            >
+              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Welcome Message */}
@@ -77,7 +104,10 @@ export default function Home() {
           {/* Row 1 - My Listings & Rental Requests */}
           <View className="flex-row gap-4">
             {/* My Listings Card */}
-            <TouchableOpacity className="flex-1 h-40 rounded-3xl overflow-hidden">
+            <TouchableOpacity
+              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              onPress={() => router.push("/my-listings" as any)}
+            >
               <LinearGradient
                 colors={["#3B82F6", "#1D4ED8"]}
                 start={{ x: 0, y: 0 }}
@@ -99,7 +129,10 @@ export default function Home() {
             </TouchableOpacity>
 
             {/* Rental Requests Card */}
-            <TouchableOpacity className="flex-1 h-40 rounded-3xl overflow-hidden">
+            <TouchableOpacity
+              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              onPress={() => router.push("/bookings" as any)}
+            >
               <LinearGradient
                 colors={["#8B5CF6", "#6D28D9"]}
                 start={{ x: 0, y: 0 }}
@@ -122,7 +155,10 @@ export default function Home() {
           {/* Row 2 - Rent a Vehicle & List a Vehicle */}
           <View className="flex-row gap-4">
             {/* Rent a Vehicle Card */}
-            <TouchableOpacity className="flex-1 h-40 rounded-3xl overflow-hidden">
+            <TouchableOpacity 
+              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              onPress={() => router.push("/vehicles" as any)}
+            >
               <LinearGradient
                 colors={["#10B981", "#059669"]}
                 start={{ x: 0, y: 0 }}

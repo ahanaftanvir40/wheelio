@@ -66,13 +66,13 @@ router.post("/bookings", auth, async (req, res) => {
     const ownerNotify = await sendEmail(
       ownerEmail,
       `Booking Request: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingID}`,
-      `Dear ${owner.name}, \n${user.name} has requested to book your vehicle ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd}.\n\nRegards, \nTeam WheelZOnRent`
+      `Dear ${owner.name}, \n${user.name} has requested to book your vehicle ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd}.\n\nRegards, \nTeam Wheelio`
     );
 
     const userNotify = await sendEmail(
       user.email,
       `Booking Request sent. Vehicle: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingID}`,
-      `Dear ${user.name}, \nYour booking request for ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been sent to the owner. \n\nRegards, \nTeam WheelZOnRent`
+      `Dear ${user.name}, \nYour booking request for ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been sent to the owner. \n\nRegards, \nTeam Wheelio`
     );
 
     res.json({ success: true, bookingId: newBooking._id });
@@ -131,13 +131,13 @@ router.post("/bookings/:id/approve", async (req, res) => {
     const userNotify = await sendEmail(
       userEmail,
       `Booking approved. Vehicle: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingId}`,
-      `Dear ${user.name}, \nYour booking request for ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been approved by the owner. \n\nRegards, \nTeam WheelZOnRent`
+      `Dear ${user.name}, \nYour booking request for ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been approved by the owner. \n\nRegards, \nTeam Wheelio`
     );
 
     const ownerNotify = await sendEmail(
       ownerEmail,
       `Booking approved. Vehicle: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingId}`,
-      `Dear ${owner.name}, \nYour approval for the booking request of ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been notified to the customer. \n\nRegards, \nTeam WheelZOnRent`
+      `Dear ${owner.name}, \nYour approval for the booking request of ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been notified to the customer. \n\nRegards, \nTeam Wheelio`
     );
 
     res.status(200).send("Booking approved");
@@ -174,7 +174,7 @@ router.delete("/booking/:id", auth, async (req, res) => {
       await sendEmail(
         booking.userId.email,
         `Booking Cancelled. Booking ID: ${booking._id}`,
-        `Dear ${booking.userId.name}, \nYour booking for ${booking.vehicleId.brand} ${booking.vehicleId.model} has been cancelled. \n\nRegards, \nTeam WheelZOnRent`
+        `Dear ${booking.userId.name}, \nYour booking for ${booking.vehicleId.brand} ${booking.vehicleId.model} has been cancelled. \n\nRegards, \nTeam Wheelio`
       );
     } catch (emailError) {
       console.error("Error sending email to user:", emailError);
@@ -184,7 +184,7 @@ router.delete("/booking/:id", auth, async (req, res) => {
       await sendEmail(
         booking.ownerId.email,
         `Booking Cancelled. Booking ID: ${booking._id}`,
-        `Dear ${booking.ownerId.name}, \n${booking.userId.name} has cancelled the booking for your vehicle ${booking.vehicleId.brand} ${booking.vehicleId.model}. \n\nRegards, \nTeam WheelZOnRent`
+        `Dear ${booking.ownerId.name}, \n${booking.userId.name} has cancelled the booking for your vehicle ${booking.vehicleId.brand} ${booking.vehicleId.model}. \n\nRegards, \nTeam Wheelio`
       );
     } catch (emailError) {
       console.error("Error sending email to owner:", emailError);
