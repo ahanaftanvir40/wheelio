@@ -58,34 +58,68 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* User Info & Logout */}
-          <View className="flex-row items-center gap-3">
-            <View>
-              <Text className="text-sm font-semibold text-right text-neutral-900 dark:text-neutral-100">
-                {user?.name || "User"}
-              </Text>
-              <Text className="text-xs text-neutral-500 dark:text-neutral-400">
-                {user?.userType || "Member"}
-              </Text>
-            </View>
-            <View className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center border-2 border-white dark:border-neutral-800">
-              {user?.avatar ? (
-                <Image
-                  source={{ uri: user.avatar }}
-                  style={{ width: 48, height: 48, borderRadius: 24 }}
-                />
-              ) : (
-                <Text className="text-white font-bold text-lg">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </Text>
-              )}
-            </View>
+          {/* User Menu */}
+          <View className="relative">
             <TouchableOpacity
-              onPress={handleLogout}
-              className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl items-center justify-center"
+              onPress={() => setShowMenu(!showMenu)}
+              className="flex-row items-center gap-2"
             >
-              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <View className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center border-2 border-white dark:border-neutral-800">
+                {user?.avatar ? (
+                  <Image
+                    source={{ uri: user.avatar }}
+                    style={{ width: 40, height: 40, borderRadius: 20 }}
+                  />
+                ) : (
+                  <Text className="text-white font-bold">
+                    {user?.name?.charAt(0).toUpperCase() || "U"}
+                  </Text>
+                )}
+              </View>
+              <Ionicons
+                name={showMenu ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#6B7280"
+              />
             </TouchableOpacity>
+
+            {/* Dropdown Menu */}
+            {showMenu && (
+              <View className="absolute top-12 right-0 bg-white dark:bg-neutral-800 rounded-2xl shadow-lg border border-neutral-200 dark:border-neutral-700 min-w-[200px] z-50">
+                <View className="p-3 border-b border-neutral-200 dark:border-neutral-700">
+                  <Text className="font-semibold text-neutral-900 dark:text-neutral-100">
+                    {user?.name || "User"}
+                  </Text>
+                  <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {user?.email}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowMenu(false);
+                    router.push("/profile" as any);
+                  }}
+                  className="flex-row items-center gap-3 px-4 py-3 border-b border-neutral-200 dark:border-neutral-700"
+                >
+                  <Ionicons name="person-outline" size={20} color="#6B7280" />
+                  <Text className="text-neutral-700 dark:text-neutral-300">
+                    View Profile
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowMenu(false);
+                    handleLogout();
+                  }}
+                  className="flex-row items-center gap-3 px-4 py-3"
+                >
+                  <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                  <Text className="text-red-600">Logout</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
 
@@ -152,10 +186,10 @@ export default function Home() {
             </TouchableOpacity>
           </View>
 
-          {/* Row 2 - Rent a Vehicle & List a Vehicle */}
+          {/* Row 2 - Rent a Vehicle & Messages */}
           <View className="flex-row gap-4">
             {/* Rent a Vehicle Card */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-1 h-40 rounded-3xl overflow-hidden"
               onPress={() => router.push("/vehicles" as any)}
             >
@@ -179,34 +213,62 @@ export default function Home() {
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* List a Vehicle Card */}
+            {/* Messages Card */}
             <TouchableOpacity
               className="flex-1 h-40 rounded-3xl overflow-hidden"
-              onPress={() => router.push("/list-vehicle")}
+              onPress={() => router.push("/chats" as any)}
             >
               <LinearGradient
-                colors={["#EC4899", "#BE185D"]}
+                colors={["#06B6D4", "#0891B2"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="flex-1 p-5 justify-between"
               >
                 <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
-                  <Ionicons name="add-circle" size={24} color="white" />
+                  <Ionicons name="chatbubbles" size={24} color="white" />
                 </View>
                 <View>
                   <Text className="text-white text-xl font-bold">
-                    List Vehicle
+                    Messages
                   </Text>
                   <Text className="text-white/80 text-sm mt-1">
-                    Add your car
+                    Chat with owners
                   </Text>
                 </View>
               </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          {/* Row 3 - WheelioHub (Large Card) */}
-          <TouchableOpacity className="h-56 rounded-3xl overflow-hidden">
+          {/* Row 3 - List a Vehicle */}
+          <TouchableOpacity
+            className="h-40 rounded-3xl overflow-hidden"
+            onPress={() => router.push("/list-vehicle")}
+          >
+            <LinearGradient
+              colors={["#EC4899", "#BE185D"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="flex-1 p-5 justify-between"
+            >
+              <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <Ionicons name="add-circle" size={24} color="white" />
+              </View>
+              <View>
+                <Text className="text-white text-xl font-bold">
+                  List Vehicle
+                </Text>
+                <Text className="text-white/80 text-sm mt-1">
+                  Add your car
+                </Text>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Row 4 - WheelioHub (Large Card) */}
+          <TouchableOpacity
+            className="h-56 rounded-3xl overflow-hidden"
+            onPress={() => router.push("/wheelhub" as any)}
+          >
             <LinearGradient
               colors={["#F59E0B", "#D97706"]}
               start={{ x: 0, y: 0 }}

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { SERVER_URL } from "../../lib/api";
 import RatingStars from "./RatingStars";
 
 interface Vehicle {
@@ -25,10 +26,8 @@ interface VehicleCardProps {
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
   const router = useRouter();
 
-  // Get the base URL - remove /api suffix for image paths
-  const baseURL = "http://192.168.31.187:3000";
   const imageUrl = vehicle.images && vehicle.images.length > 0
-    ? `${baseURL}/public/images/vehicle-images/${vehicle.images[0]}`
+    ? `${SERVER_URL}/public/images/vehicle-images/${vehicle.images[0]}`
     : null;
 
   const handlePress = () => {

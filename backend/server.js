@@ -110,6 +110,30 @@ app.get("/api/ownerChats/:vehicleId/:ownerId", async (req, res) => {
   res.json({ userIds, userNames });
 });
 
+app.get("/api/userChats/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    // Get all unique combinations of vehicleId and ownerId where user sent messages
+    const messages = await Message.find({ userId }).distinct("vehicleId");
+    const chats = [];
+    
+    for (const vehicleId of messages) {
+      const message = await Message.findOne({ userId, vehicleId });
+      if (message) {
+        chats.push({
+          vehicleId: message.vehicleId,
+          ownerId: message.ownerId,
+          userId: message.userId,
+        });
+      }
+    }
+    
+    res.json(chats);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 server.listen(port, () => {
   console.log(`server is running on ${port}`);
 });

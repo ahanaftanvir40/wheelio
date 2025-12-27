@@ -15,7 +15,7 @@ const router = express.Router()
 router.post('/createuser', upload.fields([{ name: 'avatar' }, { name: 'licenseFile' }]), async (req, res) => {
     let { userType } = req.body
     const avatar = req.files['avatar'] ? req.files['avatar'][0].filename : 'default.jpg'
-    const licenseFile = req.files['licenseFile'] ? req.files['licenseFile'][0].filename : null;
+    const licenseFile = req.files['licenseFile'] ? req.files['licenseFile'][0].filename : undefined;
 
     const useSchema = z.object({
         name: z.string().min(1, 'Name must be more than 1 character'),
@@ -38,19 +38,31 @@ router.post('/createuser', upload.fields([{ name: 'avatar' }, { name: 'licenseFi
             if (user) {
                 return res.json({ success: false });
             }
+            
+            // Validate driver-specific requirements
+            if (userType === 'Driver' && !licenseFile) {
+                return res.json({ success: false, message: 'License file is required for drivers' });
+            }
+            
             bcrypt.genSalt(10, (err, salt) => {
                 bcrypt.hash(password, salt, async (err, hash) => {
-                    await User.create({
+                    const userData = {
                         avatar,
                         userType,
                         name,
                         email,
                         password: hash,
                         phoneNumber,
-                        licenseFile,
-                        drivingLicense,
-                        nationalId
-                    })
+                    };
+                    
+                    // Only add driver-specific fields if userType is Driver
+                    if (userType === 'Driver') {
+                        userData.licenseFile = licenseFile;
+                        userData.drivingLicense = drivingLicense;
+                        userData.nationalId = nationalId;
+                    }
+                    
+                    await User.create(userData);
                 })
             })
         }

@@ -15,6 +15,12 @@ export default function RootLayout() {
         <Stack.Screen name="vehicles/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="my-listings/index" options={{ headerShown: false }} />
         <Stack.Screen name="bookings/index" options={{ headerShown: false }} />
+        <Stack.Screen name="wheelhub/index" options={{ headerShown: false }} />
+        <Stack.Screen name="wheelhub/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="chats/index" options={{ headerShown: false }} />
+        <Stack.Screen name="chats/[vehicleId]/[ownerId]/[userId]" options={{ headerShown: false }} />
+        <Stack.Screen name="profile/index" options={{ headerShown: false }} />
+        <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
       </Stack>
     </AuthProvider>
   );
