@@ -172,12 +172,16 @@ export default function Auth() {
 
     // Add avatar if selected
     if (avatar) {
-      const avatarFile: any = {
-        uri: avatar.uri,
-        type: "image/jpeg",
-        name: `avatar_${Date.now()}.jpg`,
-      };
-      formData.append("avatar", avatarFile);
+      // For web, use the File object directly; for mobile, use the URI format
+      if (avatar.file) {
+        formData.append("avatar", avatar.file);
+      } else {
+        formData.append("avatar", {
+          uri: avatar.uri,
+          type: avatar.mimeType || "image/jpeg",
+          name: avatar.fileName || `avatar_${Date.now()}.jpg`,
+        } as any);
+      }
     }
 
     // Add driver-specific fields
@@ -186,12 +190,16 @@ export default function Auth() {
       formData.append("nationalId", nationalId);
 
       if (licenseFile) {
-        const licenseFileData: any = {
-          uri: licenseFile.uri,
-          type: "image/jpeg",
-          name: `license_${Date.now()}.jpg`,
-        };
-        formData.append("licenseFile", licenseFileData);
+        // For web, use the File object directly; for mobile, use the URI format
+        if (licenseFile.file) {
+          formData.append("licenseFile", licenseFile.file);
+        } else {
+          formData.append("licenseFile", {
+            uri: licenseFile.uri,
+            type: licenseFile.mimeType || "image/jpeg",
+            name: licenseFile.fileName || `license_${Date.now()}.jpg`,
+          } as any);
+        }
       }
     }
 

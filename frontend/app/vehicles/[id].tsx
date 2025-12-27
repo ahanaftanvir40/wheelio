@@ -13,7 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../../lib/api";
+import api, { SERVER_URL } from "../../lib/api";
 import RatingStars from "../../components/vehicles/RatingStars";
 import BookingModal from "../../components/booking/BookingModal";
 
@@ -70,8 +70,6 @@ export default function VehicleDetails() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
 
-  const baseURL = "http://192.168.31.187:3000";
-
   useEffect(() => {
     if (id) {
       fetchVehicleDetails();
@@ -127,12 +125,9 @@ export default function VehicleDetails() {
   };
 
   const handleContactOwner = () => {
-    if (vehicle?.ownerId) {
-      Alert.alert(
-        "Contact Owner",
-        `Name: ${vehicle.ownerId.name}\nEmail: ${vehicle.ownerId.email}${
-          vehicle.ownerId.phone ? `\nPhone: ${vehicle.ownerId.phone}` : ""
-        }`
+    if (vehicle?.ownerId && currentUserId) {
+      router.push(
+        `/chats/${vehicle._id}/${vehicle.ownerId._id}/${currentUserId}` as any
       );
     }
   };
@@ -192,7 +187,7 @@ export default function VehicleDetails() {
                   <Image
                     key={index}
                     source={{
-                      uri: `${baseURL}/public/images/vehicle-images/${image}`,
+                      uri: `${SERVER_URL}/public/images/vehicle-images/${image}`,
                     }}
                     style={{ width, height: 300 }}
                     resizeMode="cover"
