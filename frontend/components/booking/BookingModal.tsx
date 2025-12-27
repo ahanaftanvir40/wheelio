@@ -5,12 +5,12 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Calendar, DateData } from "react-native-calendars";
 import api from "../../lib/api";
 
 interface BookingModalProps {
@@ -30,19 +30,51 @@ export default function BookingModal({
   pricePerDay,
   vehicleName,
 }: BookingModalProps) {
-  const [bookingStart, setBookingStart] = useState("");
-  const [bookingEnd, setBookingEnd] = useState("");
+  const [bookingStart, setBookingStart] = useState<Date | null>(null);
+  const [bookingEnd, setBookingEnd] = useState<Date | null>(null);
   const [driverId, setDriverId] = useState("");
   const [needDriver, setNeedDriver] = useState(false);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [unavailableDates, setUnavailableDates] = useState<{[key: string]: any}>({});
+  const [selectingStartDate, setSelectingStartDate] = useState(true);
 
   useEffect(() => {
-    if (visible && needDriver) {
-      fetchDrivers();
+    if (visible) {
+      fetchUnavailableDates();
+      if (needDriver) {
+        fetchDrivers();
+      }
     }
   }, [visible, needDriver]);
+
+  const fetchUnavailableDates = async () => {
+    try {
+      const response = await api.get(`/bookings/unavailable-dates/${vehicleId}`);
+      const dates: {[key: string]: any} = {};
+      
+      response.data.unavailableDates.forEach((range: {start: string, end: string}) => {
+        const start = new Date(range.start);
+        const end = new Date(range.end);
+        
+        // Mark all dates in the range as disabled
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateString = d.toISOString().split('T')[0];
+          dates[dateString] = {
+            disabled: true,
+            disableTouchEvent: true,
+            color: '#EF4444',
+            textColor: '#FFFFFF'
+          };
+        }
+      });
+      
+      setUnavailableDates(dates);
+    } catch (error) {
+      console.error("Error fetching unavailable dates:", error);
+    }
+  };
 
   const fetchDrivers = async () => {
     try {
@@ -58,11 +90,86 @@ export default function BookingModal({
     }
   };
 
+  const handleDayPress = (day: DateData) => {
+    const selectedDate = new Date(day.dateString);
+    
+    if (selectingStartDate) {
+      setBookingStart(selectedDate);
+      setBookingEnd(null);
+      setSelectingStartDate(false);
+    } else {
+      if (selectedDate <= bookingStart!) {
+        Alert.alert("Error", "End date must be after start date");
+        return;
+      }
+      setBookingEnd(selectedDate);
+      setSelectingStartDate(true);
+    }
+  };
+
+  const getMarkedDates = () => {
+    const marked: {[key: string]: any} = {};
+    
+    // First, add all unavailable dates
+    Object.keys(unavailableDates).forEach(date => {
+      marked[date] = {
+        disabled: true,
+        disableTouchEvent: true,
+        color: '#EF4444',
+        textColor: '#FFFFFF',
+      };
+    });
+    
+    // Then add selected dates
+    if (bookingStart && bookingEnd) {
+      const startString = bookingStart.toISOString().split('T')[0];
+      const endString = bookingEnd.toISOString().split('T')[0];
+      
+      marked[startString] = {
+        startingDay: true,
+        color: '#3B82F6',
+        textColor: '#FFFFFF',
+      };
+      
+      marked[endString] = {
+        endingDay: true,
+        color: '#3B82F6',
+        textColor: '#FFFFFF',
+      };
+      
+      // Mark dates in between
+      const start = new Date(bookingStart);
+      const end = new Date(bookingEnd);
+      const current = new Date(start);
+      current.setDate(current.getDate() + 1);
+      
+      while (current < end) {
+        const dateString = current.toISOString().split('T')[0];
+        if (!unavailableDates[dateString]) {
+          marked[dateString] = {
+            color: '#93C5FD',
+            textColor: '#1F2937',
+          };
+        }
+        current.setDate(current.getDate() + 1);
+      }
+    } else if (bookingStart) {
+      // When only start date is selected, mark it with solid color
+      const startString = bookingStart.toISOString().split('T')[0];
+      marked[startString] = {
+        startingDay: true,
+        endingDay: true,
+        color: '#3B82F6',
+        textColor: '#FFFFFF',
+      };
+    }
+    
+    return marked;
+  };
+
   const calculateDays = () => {
     if (!bookingStart || !bookingEnd) return 0;
-    const start = new Date(bookingStart);
-    const end = new Date(bookingEnd);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffTime = Math.abs(bookingEnd.getTime() - bookingStart.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays || 1;
   };
@@ -79,15 +186,14 @@ export default function BookingModal({
       return;
     }
 
-    const start = new Date(bookingStart);
-    const end = new Date(bookingEnd);
-
-    if (start >= end) {
+    if (bookingStart >= bookingEnd) {
       Alert.alert("Error", "End date must be after start date");
       return;
     }
 
-    if (start < new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (bookingStart < today) {
       Alert.alert("Error", "Start date cannot be in the past");
       return;
     }
@@ -105,8 +211,8 @@ export default function BookingModal({
         vehicleId,
         ownerId,
         driverId: needDriver ? driverId : null,
-        bookingStart: start.toISOString(),
-        bookingEnd: end.toISOString(),
+        bookingStart: bookingStart.toISOString(),
+        bookingEnd: bookingEnd.toISOString(),
         totalAmount: calculateTotal(),
       };
 
@@ -145,10 +251,11 @@ export default function BookingModal({
   };
 
   const resetForm = () => {
-    setBookingStart("");
-    setBookingEnd("");
+    setBookingStart(null);
+    setBookingEnd(null);
     setDriverId("");
     setNeedDriver(false);
+    setSelectingStartDate(true);
   };
 
   const handleClose = () => {
@@ -178,42 +285,82 @@ export default function BookingModal({
           <ScrollView className="px-6 py-4" showsVerticalScrollIndicator={false}>
             {/* Date Selection */}
             <View className="mb-6">
-              <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
-                Rental Period
-              </Text>
-
-              {/* Start Date */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
-                  Start Date
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+                  Select Dates
                 </Text>
-                <TextInput
-                  value={bookingStart}
-                  onChangeText={setBookingStart}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#9CA3AF"
-                  className="bg-neutral-100 dark:bg-neutral-800 rounded-xl px-4 py-3 text-neutral-900 dark:text-neutral-100"
-                />
-                <Text className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
-                  Format: YYYY-MM-DD (e.g., 2024-12-25)
-                </Text>
+                <View className="bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">
+                  <Text className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                    {selectingStartDate ? "Select Start Date" : "Select End Date"}
+                  </Text>
+                </View>
               </View>
 
-              {/* End Date */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-600 dark:text-neutral-400 mb-2">
-                  End Date
-                </Text>
-                <TextInput
-                  value={bookingEnd}
-                  onChangeText={setBookingEnd}
-                  placeholder="YYYY-MM-DD"
-                  placeholderTextColor="#9CA3AF"
-                  className="bg-neutral-100 dark:bg-neutral-800 rounded-xl px-4 py-3 text-neutral-900 dark:text-neutral-100"
+              {/* Selected Dates Display */}
+              <View className="flex-row gap-2 mb-3">
+                <View className="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl p-3">
+                  <Text className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
+                    Start Date
+                  </Text>
+                  <Text className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                    {bookingStart ? bookingStart.toLocaleDateString() : "Not selected"}
+                  </Text>
+                </View>
+                <View className="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-xl p-3">
+                  <Text className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
+                    End Date
+                  </Text>
+                  <Text className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                    {bookingEnd ? bookingEnd.toLocaleDateString() : "Not selected"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Calendar */}
+              <View className="rounded-xl overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800">
+                <Calendar
+                  onDayPress={handleDayPress}
+                  markedDates={getMarkedDates()}
+                  minDate={new Date().toISOString().split('T')[0]}
+                  markingType="period"
+                  theme={{
+                    backgroundColor: '#F9FAFB',
+                    calendarBackground: '#F9FAFB',
+                    textSectionTitleColor: '#6B7280',
+                    selectedDayBackgroundColor: '#3B82F6',
+                    selectedDayTextColor: '#ffffff',
+                    todayTextColor: '#3B82F6',
+                    dayTextColor: '#1F2937',
+                    textDisabledColor: '#D1D5DB',
+                    dotColor: '#3B82F6',
+                    selectedDotColor: '#ffffff',
+                    arrowColor: '#3B82F6',
+                    monthTextColor: '#1F2937',
+                    indicatorColor: '#3B82F6',
+                    textDayFontWeight: '400',
+                    textMonthFontWeight: 'bold',
+                    textDayHeaderFontWeight: '600',
+                    textDayFontSize: 14,
+                    textMonthFontSize: 16,
+                    textDayHeaderFontSize: 12,
+                  }}
                 />
-                <Text className="text-xs text-neutral-500 dark:text-neutral-500 mt-1">
-                  Format: YYYY-MM-DD (e.g., 2024-12-30)
-                </Text>
+              </View>
+
+              {/* Legend */}
+              <View className="flex-row items-center gap-4 mt-3 px-2">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-4 h-4 rounded bg-blue-600" />
+                  <Text className="text-xs text-neutral-600 dark:text-neutral-400">
+                    Selected
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-2">
+                  <View className="w-4 h-4 rounded bg-red-600" />
+                  <Text className="text-xs text-neutral-600 dark:text-neutral-400">
+                    Booked
+                  </Text>
+                </View>
               </View>
             </View>
 

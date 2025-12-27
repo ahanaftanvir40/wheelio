@@ -334,7 +334,7 @@ export default function VehicleDetails() {
                   onPress={handleContactOwner}
                   className="bg-blue-600 px-4 py-2 rounded-lg"
                 >
-                  <Text className="text-white font-semibold">Contact</Text>
+                  <Text className="text-white font-semibold">Chat</Text>
                 </TouchableOpacity>
               </View>
             </View>

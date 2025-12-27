@@ -11,7 +11,6 @@ export const auth = (req, res, next) => {
     try {
         const data = jwt.verify(authToken, process.env.JWT_SECRET)
         req.user = data
-        console.log(`decoded:`, req.user);
         next()
     } catch (error) {
         res.send(error)

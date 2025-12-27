@@ -47,6 +47,11 @@ router.post("/bookings", auth, async (req, res) => {
     await newBooking.save();
     const bookingID = newBooking._id;
     const user = await User.findOne({ _id: req.user.id });
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    
     user.bookings.push(newBooking._id);
     await user.save();
 
@@ -142,6 +147,69 @@ router.post("/bookings/:id/approve", async (req, res) => {
 
     res.status(200).send("Booking approved");
   } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+router.post("/bookings/:id/return", auth, async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+    const booking = await Booking.findById(bookingId).populate("ownerId userId vehicleId");
+    
+    if (!booking) {
+      return res.status(404).send("Booking not found");
+    }
+
+    // Check if the user is the owner
+    if (booking.ownerId._id.toString() !== req.user.id) {
+      return res.status(403).send("Unauthorized: Only the owner can mark as returned");
+    }
+
+    // Check if booking is approved
+    if (booking.status !== "approved") {
+      return res.status(400).send("Only approved bookings can be marked as returned");
+    }
+
+    booking.status = "returned";
+    await booking.save();
+
+    const owner = booking.ownerId;
+    const vehicle = booking.vehicleId;
+    const user = booking.userId;
+
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+    const formattedBookingStart = booking.bookingStart
+      .toLocaleDateString("en-GB", options)
+      .replace(/\//g, "-");
+    const formattedBookingEnd = booking.bookingEnd
+      .toLocaleDateString("en-GB", options)
+      .replace(/\//g, "-");
+
+    // Notify user
+    try {
+      await sendEmail(
+        user.email,
+        `Rental Completed: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingId}`,
+        `Dear ${user.name}, \nYour rental of ${vehicle.brand} ${vehicle.model} from ${formattedBookingStart} to ${formattedBookingEnd} has been marked as completed. \n\nThank you for using Wheelio! You can now rate your experience. \n\nRegards, \nTeam Wheelio`
+      );
+    } catch (emailError) {
+      console.error("Error sending email to user:", emailError);
+    }
+
+    // Notify owner
+    try {
+      await sendEmail(
+        owner.email,
+        `Rental Completed: ${vehicle.brand} ${vehicle.model}. Booking ID: ${bookingId}`,
+        `Dear ${owner.name}, \nYou have successfully marked the rental of ${vehicle.brand} ${vehicle.model} as completed. \n\nRegards, \nTeam Wheelio`
+      );
+    } catch (emailError) {
+      console.error("Error sending email to owner:", emailError);
+    }
+
+    res.status(200).send("Booking marked as returned");
+  } catch (error) {
+    console.error("Error marking booking as returned:", error);
     res.status(500).send(error.message);
   }
 });
