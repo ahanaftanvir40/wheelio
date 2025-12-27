@@ -14,18 +14,21 @@ export default function Index() {
   const checkOnboardingStatus = async () => {
     try {
       const onboardingSeen = await AsyncStorage.getItem('onboardingSeen');
+      const authToken = await AsyncStorage.getItem('authToken');
       
-      // Small delay for splash effect
       setTimeout(() => {
-        if (onboardingSeen === 'true') {
+        if (authToken) {
+          router.replace('/home');
+        }
+        else if (onboardingSeen === 'true') {
           router.replace('/auth');
-        } else {
+        }
+        else {
           router.replace('/onboarding');
         }
       }, 1000);
     } catch (error) {
       console.error('Error checking onboarding status:', error);
-      // Default to onboarding on error
       router.replace('/onboarding');
     }
   };

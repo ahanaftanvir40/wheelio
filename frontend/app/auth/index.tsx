@@ -10,6 +10,7 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../context/authContext";
 
@@ -17,6 +18,11 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
+
+  // Password visibility state
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
@@ -270,14 +276,26 @@ export default function Auth() {
                   <Text className="text-sm font-medium mb-2 text-neutral-700 dark:text-neutral-300">
                     Password
                   </Text>
-                  <TextInput
-                    className="h-12 px-4 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                    placeholder="Enter your password"
-                    placeholderTextColor="#9ca3af"
-                    secureTextEntry
-                    value={loginPassword}
-                    onChangeText={setLoginPassword}
-                  />
+                  <View className="relative">
+                    <TextInput
+                      className="h-12 px-4 pr-12 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                      placeholder="Enter your password"
+                      placeholderTextColor="#9ca3af"
+                      secureTextEntry={!showLoginPassword}
+                      value={loginPassword}
+                      onChangeText={setLoginPassword}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-4 top-3"
+                    >
+                      <Ionicons
+                        name={showLoginPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#9ca3af"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 <TouchableOpacity
@@ -343,28 +361,52 @@ export default function Auth() {
                   <Text className="text-sm font-medium mb-2 text-neutral-700 dark:text-neutral-300">
                     Password
                   </Text>
-                  <TextInput
-                    className="h-12 px-4 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                    placeholder="Enter your password"
-                    placeholderTextColor="#9ca3af"
-                    secureTextEntry
-                    value={signupPassword}
-                    onChangeText={setSignupPassword}
-                  />
+                  <View className="relative">
+                    <TextInput
+                      className="h-12 px-4 pr-12 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                      placeholder="Enter your password"
+                      placeholderTextColor="#9ca3af"
+                      secureTextEntry={!showSignupPassword}
+                      value={signupPassword}
+                      onChangeText={setSignupPassword}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-4 top-3"
+                    >
+                      <Ionicons
+                        name={showSignupPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#9ca3af"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 <View>
                   <Text className="text-sm font-medium mb-2 text-neutral-700 dark:text-neutral-300">
                     Confirm Password
                   </Text>
-                  <TextInput
-                    className="h-12 px-4 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
-                    placeholder="Confirm your password"
-                    placeholderTextColor="#9ca3af"
-                    secureTextEntry
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                  />
+                  <View className="relative">
+                    <TextInput
+                      className="h-12 px-4 pr-12 rounded-xl bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100"
+                      placeholder="Confirm your password"
+                      placeholderTextColor="#9ca3af"
+                      secureTextEntry={!showConfirmPassword}
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-4 top-3"
+                    >
+                      <Ionicons
+                        name={showConfirmPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#9ca3af"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 {/* User Type Selection */}

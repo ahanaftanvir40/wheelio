@@ -148,6 +148,37 @@ export default function Bookings() {
     );
   };
 
+  const handleMarkAsReturned = async (bookingId: string) => {
+    Alert.alert(
+      "Mark as Returned",
+      "Confirm that the vehicle has been returned?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Confirm",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("authToken");
+              await api.post(`/bookings/${bookingId}/return`, {}, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              Alert.alert("Success", "Booking marked as returned successfully!");
+              fetchBookings();
+            } catch (error: any) {
+              console.error("Error marking as returned:", error);
+              Alert.alert("Error", error.response?.data || "Failed to mark as returned");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -170,25 +201,31 @@ export default function Bookings() {
     }
   };
 
-  const renderBookingCard = (booking: Booking, isIncoming: boolean) => (
-    <View
-      key={booking._id}
-      className="bg-white dark:bg-neutral-800 rounded-2xl p-4 mb-4 shadow-sm"
-    >
-      {/* Vehicle Info */}
-      <View className="flex-row items-center justify-between mb-3">
-        <View className="flex-1">
-          <Text className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
-            {booking.vehicleId.brand} {booking.vehicleId.model}
-          </Text>
-          <Text className="text-sm text-neutral-600 dark:text-neutral-400">
-            {isIncoming ? `Requested by: ${booking.userId.name}` : `Owner: ${booking.ownerId.name}`}
-          </Text>
+  const renderBookingCard = (booking: Booking, isIncoming: boolean) => {
+    // Check if required data is populated
+    if (!booking.vehicleId || !booking.userId || !booking.ownerId) {
+      return null;
+    }
+
+    return (
+      <View
+        key={booking._id}
+        className="bg-white dark:bg-neutral-800 rounded-2xl p-4 mb-4 shadow-sm"
+      >
+        {/* Vehicle Info */}
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+              {booking.vehicleId.brand} {booking.vehicleId.model}
+            </Text>
+            <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+              {isIncoming ? `Requested by: ${booking.userId.name}` : `Owner: ${booking.ownerId.name}`}
+            </Text>
+          </View>
+          <View className={`px-3 py-1 rounded-full ${getStatusColor(booking.status)}`}>
+            <Text className="text-xs font-semibold capitalize">{booking.status}</Text>
+          </View>
         </View>
-        <View className={`px-3 py-1 rounded-full ${getStatusColor(booking.status)}`}>
-          <Text className="text-xs font-semibold capitalize">{booking.status}</Text>
-        </View>
-      </View>
 
       {/* Dates */}
       <View className="bg-neutral-50 dark:bg-neutral-900 rounded-xl p-3 mb-3">
@@ -224,6 +261,15 @@ export default function Bookings() {
         </View>
       )}
 
+      {isIncoming && booking.status === "approved" && (
+        <TouchableOpacity
+          onPress={() => handleMarkAsReturned(booking._id)}
+          className="bg-blue-600 py-3 rounded-xl"
+        >
+          <Text className="text-center text-white font-semibold">Mark as Returned</Text>
+        </TouchableOpacity>
+      )}
+
       {!isIncoming && booking.status === "pending" && (
         <TouchableOpacity
           onPress={() => handleCancel(booking._id)}
@@ -232,8 +278,9 @@ export default function Bookings() {
           <Text className="text-center text-white font-semibold">Cancel Request</Text>
         </TouchableOpacity>
       )}
-    </View>
-  );
+      </View>
+    );
+  };
 
   const renderEmptyState = (type: "incoming" | "outgoing") => (
     <View className="flex-1 items-center justify-center px-6 py-20">
