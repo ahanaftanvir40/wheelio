@@ -19,7 +19,7 @@ import api, { SERVER_URL } from "../../../../lib/api";
 import io from "socket.io-client";
 
 const SOCKET_URL =
-  process.env.BACKEND_URL?.replace("/api", "") || "http://192.168.31.187:3000";
+  process.env.EXPO_PUBLIC_BACKEND_URL?.replace("/api", "") || "http://192.168.31.187:3000";
 
 interface Message {
   message: string;
