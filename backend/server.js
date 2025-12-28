@@ -134,6 +134,6 @@ app.get("/api/userChats/:userId", async (req, res) => {
   }
 });
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`server is running on ${port}`);
 });

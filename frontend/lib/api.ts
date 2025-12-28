@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://192.168.31.187:3000/api";
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || "http://192.168.31.187:3000/api";
 
 // Extract base server URL (without /api) for image paths
 export const SERVER_URL = BACKEND_URL.replace("/api", "");

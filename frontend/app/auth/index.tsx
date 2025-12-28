@@ -147,6 +147,7 @@ export default function Auth() {
 
   // Handle Login
   const handleLogin = async () => {
+    console.log("Backend URL:", process.env.EXPO_PUBLIC_BACKEND_URL);
     setError("");
     if (!validateLoginForm()) return;
 

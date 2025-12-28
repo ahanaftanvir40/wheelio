@@ -94,21 +94,22 @@ export default function Home() {
         </View>
 
         {/* Bento Box Grid */}
-        <View className="px-6 pb-6 gap-4">
+        <View className="px-6 pb-6" style={{ gap: 16 }}>
           {/* Row 1 - My Listings & Rental Requests */}
-          <View className="flex-row gap-4">
+          <View className="flex-row" style={{ gap: 16 }}>
             {/* My Listings Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/my-listings" as any)}
             >
               <LinearGradient
                 colors={["#3B82F6", "#1D4ED8"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="list" size={24} color="white" />
                 </View>
                 <View>
@@ -124,16 +125,17 @@ export default function Home() {
 
             {/* Rental Requests Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/bookings" as any)}
             >
               <LinearGradient
                 colors={["#8B5CF6", "#6D28D9"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="notifications" size={24} color="white" />
                 </View>
                 <View>
@@ -147,19 +149,20 @@ export default function Home() {
           </View>
 
           {/* Row 2 - Rent a Vehicle & Rent History */}
-          <View className="flex-row gap-4">
+          <View className="flex-row" style={{ gap: 16 }}>
             {/* Rent a Vehicle Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/vehicles" as any)}
             >
               <LinearGradient
                 colors={["#10B981", "#059669"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="search" size={24} color="white" />
                 </View>
                 <View>
@@ -175,16 +178,17 @@ export default function Home() {
 
             {/* Rent History Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/rent-history" as any)}
             >
               <LinearGradient
                 colors={["#06B6D4", "#0891B2"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="time" size={24} color="white" />
                 </View>
                 <View>
@@ -200,19 +204,20 @@ export default function Home() {
           </View>
 
           {/* Row 3 - Messages & List Vehicle */}
-          <View className="flex-row gap-4">
+          <View className="flex-row" style={{ gap: 16 }}>
             {/* Messages Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/chats" as any)}
             >
               <LinearGradient
                 colors={["#EC4899", "#BE185D"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="chatbubbles" size={24} color="white" />
                 </View>
                 <View>
@@ -228,16 +233,17 @@ export default function Home() {
 
             {/* List Vehicle Card */}
             <TouchableOpacity
-              className="flex-1 h-40 rounded-3xl overflow-hidden"
+              style={{ width: "48%", height: 160 }}
+              className="rounded-3xl overflow-hidden shadow-lg"
               onPress={() => router.push("/list-vehicle")}
             >
               <LinearGradient
                 colors={["#A855F7", "#7C3AED"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                className="flex-1 p-5 justify-between"
+                style={{ flex: 1, padding: 20, justifyContent: "space-between" }}
               >
-                <View className="bg-white/20 w-12 h-12 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 48, height: 48, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="add-circle" size={24} color="white" />
                 </View>
                 <View>
@@ -254,17 +260,18 @@ export default function Home() {
 
           {/* Row 4 - WheelioHub (Large Card) */}
           <TouchableOpacity
-            className="h-56 rounded-3xl overflow-hidden"
+            style={{ height: 220 }}
+            className="rounded-3xl overflow-hidden shadow-lg"
             onPress={() => router.push("/wheelhub" as any)}
           >
             <LinearGradient
               colors={["#F59E0B", "#D97706"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              className="flex-1 p-6 justify-between"
+              style={{ flex: 1, padding: 24, justifyContent: "space-between" }}
             >
               <View className="flex-row items-center justify-between">
-                <View className="bg-white/20 w-14 h-14 rounded-2xl items-center justify-center">
+                <View className="bg-white/20 rounded-2xl" style={{ width: 56, height: 56, alignItems: "center", justifyContent: "center" }}>
                   <Ionicons name="people" size={28} color="white" />
                 </View>
                 <View className="bg-white/20 px-4 py-2 rounded-full">
@@ -282,11 +289,11 @@ export default function Home() {
                   Connect with the community, share experiences, and discover
                   the best rental deals
                 </Text>
-                <View className="flex-row items-center gap-2">
-                  <View className="flex-row -space-x-2">
-                    <View className="w-8 h-8 rounded-full bg-white border-2 border-amber-500" />
-                    <View className="w-8 h-8 rounded-full bg-white border-2 border-amber-500" />
-                    <View className="w-8 h-8 rounded-full bg-white border-2 border-amber-500" />
+                <View className="flex-row items-center" style={{ gap: 8 }}>
+                  <View className="flex-row" style={{ marginRight: -8 }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "white", borderWidth: 2, borderColor: "#D97706" }} />
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "white", borderWidth: 2, borderColor: "#D97706", marginLeft: -8 }} />
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "white", borderWidth: 2, borderColor: "#D97706", marginLeft: -8 }} />
                   </View>
                   <Text className="text-white/80 text-sm">
                     Join 1,000+ members
