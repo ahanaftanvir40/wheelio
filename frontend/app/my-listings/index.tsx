@@ -78,6 +78,48 @@ export default function MyListings() {
     router.push("/list-vehicle");
   };
 
+  const handleRemoveVehicle = (vehicleId: string, vehicleName: string) => {
+    Alert.alert(
+      "Remove Vehicle",
+      `Are you sure you want to remove ${vehicleName}? This action cannot be undone.`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem("authToken");
+              
+              const response = await api.delete(`/vehicles/${vehicleId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (response.data.success) {
+                Alert.alert("Success", "Vehicle removed successfully");
+                // Refresh the list
+                fetchMyVehicles();
+              } else {
+                Alert.alert("Error", response.data.message || "Failed to remove vehicle");
+              }
+            } catch (error: any) {
+              console.error("Error removing vehicle:", error);
+              Alert.alert(
+                "Error",
+                error.response?.data?.message || "Failed to remove vehicle"
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const renderEmptyState = () => (
     <View className="flex-1 items-center justify-center px-6 py-20">
       <View className="w-32 h-32 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mb-6">
@@ -192,7 +234,20 @@ export default function MyListings() {
         <FlatList
           data={vehicles}
           keyExtractor={(item) => item._id}
-          renderItem={({ item }) => <VehicleCard vehicle={item} />}
+          renderItem={({ item }) => (
+            <View>
+              <VehicleCard vehicle={item} />
+              <TouchableOpacity
+                onPress={() =>
+                  handleRemoveVehicle(item._id, `${item.brand} ${item.model}`)
+                }
+                className="bg-red-500 mx-6 -mt-4 mb-4 py-3 rounded-xl flex-row items-center justify-center gap-2"
+              >
+                <Ionicons name="trash-outline" size={20} color="white" />
+                <Text className="text-white font-semibold">Remove Vehicle</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           contentContainerStyle={{ padding: 24, paddingTop: 16 }}
           ListHeaderComponent={vehicles.length > 0 ? renderHeader : null}
           ListEmptyComponent={renderEmptyState}

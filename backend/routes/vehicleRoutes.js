@@ -2,6 +2,7 @@ import express from 'express'
 import { auth } from '../middlewares/auth.js'
 import { Vehicle } from '../models/vehicle.models.js';
 import { User } from '../models/user.models.js';
+import { Booking } from '../models/booking.model.js';
 import { upload } from '../config/multer-config.js'
 
 
@@ -179,6 +180,52 @@ router.post('/vehicles/:vehicleId/rate', auth, async (req, res) => {
     }
 
 })
+
+// Delete vehicle route
+router.delete('/vehicles/:vehicleId', auth, async (req, res) => {
+    try {
+        const { vehicleId } = req.params;
+        
+        // Check if vehicle exists and belongs to the user
+        const vehicle = await Vehicle.findById(vehicleId);
+        
+        if (!vehicle) {
+            return res.status(404).json({ success: false, message: 'Vehicle not found' });
+        }
+        
+        // Check if the user is the owner
+        if (vehicle.ownerId.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to delete this vehicle' });
+        }
+        
+        // Check for active bookings (pending, approved, or inUse)
+        const activeBookings = await Booking.find({
+            vehicleId: vehicleId,
+            status: { $in: ['pending', 'approved', 'inUse'] }
+        });
+        
+        if (activeBookings.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot delete vehicle with active bookings. Please wait until all bookings are completed.'
+            });
+        }
+        
+        // Remove vehicle from user's added_vehicle_id array
+        await User.findByIdAndUpdate(
+            req.user.id,
+            { $pull: { added_vehicle_id: vehicleId } }
+        );
+        
+        // Delete the vehicle
+        await Vehicle.findByIdAndDelete(vehicleId);
+        
+        res.json({ success: true, message: 'Vehicle deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting vehicle:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 
 export default router
