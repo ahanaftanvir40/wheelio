@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Alert,
+  FlatList,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -51,7 +52,7 @@ interface Vehicle {
   category: string;
   condition: string;
   description: string;
-  images: string[];
+  images: string[][];
   averageRating: number;
   availability: boolean;
   no_plate: string;
@@ -168,46 +169,55 @@ export default function VehicleDetails() {
     <SafeAreaView className="flex-1 bg-white dark:bg-neutral-950">
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Image Gallery */}
-        <View className="relative">
-          {vehicle.images && vehicle.images.length > 0 ? (
+        <View style={{ width, height: 300 }}>
+          {vehicle.images && vehicle.images.length > 0 && vehicle.images[0] ? (
             <>
-              <ScrollView
+              <FlatList
+                data={vehicle.images[0]}
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
-                onScroll={(e) => {
+                onMomentumScrollEnd={(e) => {
                   const index = Math.round(
                     e.nativeEvent.contentOffset.x / width
                   );
                   setCurrentImageIndex(index);
                 }}
-                scrollEventThrottle={16}
-              >
-                {vehicle.images.map((image, index) => (
-                  <Image
-                    key={index}
-                    source={{
-                      uri: `${SERVER_URL}/public/images/vehicle-images/${image}`,
-                    }}
-                    style={{ width, height: 300 }}
-                    resizeMode="cover"
-                  />
-                ))}
-              </ScrollView>
+                keyExtractor={(item, index) => `${vehicle._id}-img-${index}`}
+                renderItem={({ item }) => (
+                  <View style={{ width, height: 300 }}>
+                    <Image
+                      source={{
+                        uri: `${SERVER_URL}/public/images/vehicle-images/${item}`,
+                      }}
+                      style={{ width, height: 300 }}
+                      resizeMode="cover"
+                    />
+                  </View>
+                )}
+                getItemLayout={(data, index) => ({
+                  length: width,
+                  offset: width * index,
+                  index,
+                })}
+              />
 
               {/* Image Indicators */}
-              <View className="absolute bottom-4 left-0 right-0 flex-row justify-center gap-2">
-                {vehicle.images.map((_, index) => (
-                  <View
-                    key={index}
-                    className={`h-2 rounded-full ${
-                      index === currentImageIndex
-                        ? "w-8 bg-white"
-                        : "w-2 bg-white/50"
-                    }`}
-                  />
-                ))}
-              </View>
+              {vehicle.images[0].length > 1 && (
+                <View className="absolute bottom-4 left-0 right-0 flex-row justify-center" style={{ gap: 8 }}>
+                  {vehicle.images[0].map((_, index) => (
+                    <View
+                      key={`indicator-${index}`}
+                      style={{
+                        height: 8,
+                        width: index === currentImageIndex ? 32 : 8,
+                        borderRadius: 4,
+                        backgroundColor: index === currentImageIndex ? "white" : "rgba(255,255,255,0.5)",
+                      }}
+                    />
+                  ))}
+                </View>
+              )}
             </>
           ) : (
             <View

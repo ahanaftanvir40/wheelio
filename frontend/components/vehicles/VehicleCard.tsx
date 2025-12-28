@@ -26,8 +26,10 @@ interface VehicleCardProps {
 export default function VehicleCard({ vehicle }: VehicleCardProps) {
   const router = useRouter();
 
+  console.log("server url:", SERVER_URL);
+
   const imageUrl = vehicle.images && vehicle.images.length > 0
-    ? `${SERVER_URL}/public/images/vehicle-images/${vehicle.images[0]}`
+    ? `${SERVER_URL}/public/images/vehicle-images/${vehicle.images[0][0]}`
     : null;
 
   const handlePress = () => {
